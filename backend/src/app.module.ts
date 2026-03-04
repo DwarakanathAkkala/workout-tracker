@@ -5,6 +5,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { User } from './modules/users/entities/user.entity';
 import { WorkoutsModule } from './modules/workouts/workouts.module';
 import { Workout } from './modules/workouts/entities/workout.entity';
+import { UserWorkout } from './modules/workouts/entities/user-workout.entity';
 
 @Module({
   imports: [
@@ -22,7 +23,7 @@ import { Workout } from './modules/workouts/entities/workout.entity';
       username: config.get<string>('DB_USERNAME'),
       password: config.get<string>('DB_PASSWORD'), // ConfigService handles the !! correctly
       database: config.get<string>('DB_NAME'),
-      entities: [User, Workout],
+      entities: [User, Workout, UserWorkout],
       synchronize: true,
     }),
   }),
