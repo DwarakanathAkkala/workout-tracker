@@ -3,6 +3,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './modules/auth/auth.module';
 import { User } from './modules/users/entities/user.entity';
+import { WorkoutsModule } from './modules/workouts/workouts.module';
+import { Workout } from './modules/workouts/entities/workout.entity';
 
 @Module({
   imports: [
@@ -20,13 +22,14 @@ import { User } from './modules/users/entities/user.entity';
       username: config.get<string>('DB_USERNAME'),
       password: config.get<string>('DB_PASSWORD'), // ConfigService handles the !! correctly
       database: config.get<string>('DB_NAME'),
-      entities: [User],
+      entities: [User, Workout],
       synchronize: true,
     }),
   }),
 
     // 3. Setup Feature Modules
     AuthModule,
+    WorkoutsModule
   ],
 })
 export class AppModule {}
