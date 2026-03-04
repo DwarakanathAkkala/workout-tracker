@@ -2,22 +2,30 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from '../../users/entities/user.entity';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(config: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      // Logic: config.get<string> tells TS it's a string. 
-      // The '!' tells TS 'Trust me, I checked the .env file, this is not undefined.'
-      secretOrKey: config.get<string>('JWT_SECRET')!, 
+      secretOrKey: configService.get<string>('JWT_SECRET')!,
     });
   }
 
   async validate(payload: any) {
-    // Logic: This payload is the decoded token.
-    // We return this so NestJS can attach it to the request (req.user)
-    return { userId: payload.sub, email: payload.email };
+    // Logic: Payload contains the 'sub' (User ID) we put in the token during login.
+    const user = await this.userRepository.findOne({ where: { id: payload.sub } });
+    if (!user) throw new UnauthorizedException();
+    
+    // This attaches the user object to every request: req.user
+    return user;
   }
 }
